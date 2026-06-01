@@ -1159,13 +1159,8 @@ STORE_CACHE_KEYS_IN_METADATA_DB = False
 # CORS Options
 # NOTE: enabling this requires installing the cors-related python dependencies
 # `pip install .[cors]` or `pip install apache_superset[cors]`, depending
-ENABLE_CORS = True
-CORS_OPTIONS: dict[Any, Any] = {
-    "origins": [
-        "https://tile.openstreetmap.org",
-        "https://tile.osm.ch",
-    ]
-}
+ENABLE_CORS = False
+CORS_OPTIONS: dict[Any, Any] = {}
 
 # Sanitizes the HTML content used in markdowns to allow its rendering in a safe manner.
 # Disabling this option is not recommended for security reasons. If you wish to allow
