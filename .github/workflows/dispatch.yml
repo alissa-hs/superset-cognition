@@ -1,0 +1,28 @@
+name: Dispatch to Devin Automation
+
+on:
+  issues:
+    types: [labeled]
+
+jobs:
+  dispatch:
+    if: github.event.label.name == 'devin-fix'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Send repository dispatch to devin-automation
+        run: |
+          curl -X POST \
+            -H "Authorization: Bearer ${{ secrets.GH_TOKEN }}" \
+            -H "Accept: application/vnd.github.v3+json" \
+            -H "Content-Type: application/json" \
+            https://api.github.com/repos/alissa-hs/devin-automation/dispatches \
+            -d '{
+              "event_type": "devin-fix",
+              "client_payload": {
+                "issue_number": "${{ github.event.issue.number }}",
+                "issue_title": "${{ github.event.issue.title }}",
+                "issue_body": "${{ github.event.issue.body }}",
+                "issue_url": "${{ github.event.issue.html_url }}",
+                "repo": "${{ github.repository }}"
+              }
+            }'
