@@ -17,6 +17,7 @@
 import json
 import logging
 import os
+import threading
 from typing import Any, Callable, Optional
 
 import celery
@@ -145,7 +146,22 @@ async_query_manager: AsyncQueryManager = LocalProxy(
 cache_manager = CacheManager()
 celery_app = celery.Celery()
 csrf = CSRFProtect()
-db = get_sqla_class()()
+
+# Flask-SQLAlchemy 3.x changed session scoping from thread-based to
+# app-context-based.  Superset (and its test fixtures, Celery integration,
+# etc.) relies on a single session per thread, so we restore the 2.x
+# behaviour by providing a thread-identity scope function.
+try:
+    from greenlet import getcurrent as _ident_func
+except ImportError:
+    _ident_func = threading.get_ident
+
+
+def _session_scope() -> int:
+    return _ident_func()
+
+
+db = get_sqla_class()(session_options={"scopefunc": _session_scope})
 _event_logger: dict[str, Any] = {}
 encrypted_field_factory = EncryptedFieldFactory()
 event_logger = LocalProxy(lambda: _event_logger.get("event_logger"))
